@@ -2,263 +2,247 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
-  <title>Edra</title>
+  <title>إدراء — أرشيف الطلاب</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-  <!-- التنسيقات العامة -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
-
-  <!-- تحسينات بسيطة تكمل style.css وتضمن نص أسود داخل بطاقة الدخول -->
-  <style>
-    /* تراك شاشة الدخول (يُدار من JS) */
-    #loginOverlay.login-overlay {
-      position: fixed; inset: 0;
-      display: none;               /* JS يغيّرها إلى flex */
-      align-items: center; justify-content: center;
-      background: rgba(5,8,12,.75);
-      z-index: 9999;
-      backdrop-filter: blur(1px);
-    }
-
-    /* بطاقة الدخول – خلفية فاتحة ونص أسود */
-    #loginCard.login-card{
-      width: min(480px, 94vw);
-      background: #ffffff !important;
-      color: #111 !important;
-      border: 1px solid #ccc;
-      border-radius: 16px;
-      padding: 22px 20px;
-      box-shadow: 0 14px 36px rgba(0,0,0,.4);
-      text-align: center;
-    }
-    #loginCard h2, #loginCard h3,
-    #loginCard .login-hint, #loginCard label, #loginCard .block-label {
-      color: #111 !important;
-    }
-    #loginCard input{
-      background: #f9f9f9; color: #111; border: 1px solid #bbb;
-      border-radius: 10px; padding: 10px 12px;
-    }
-
-    /* أزرار عائمة (قفل/إعادة تعيين) */
-    .float-buttons {
-      position: fixed; bottom: 18px; left: 18px; z-index: 1200;
-      display: none; gap: 8px;      /* JS يبدل display */
-    }
-    .float-btn {
-      padding: 8px 12px; border-radius: 10px;
-      background: #0e141c; color: #d7dee6; border: none; cursor: pointer;
-      box-shadow: 0 6px 16px rgba(0,0,0,.35);
-    }
-    .small-btn { padding: 4px 8px; font-size: .85rem; }
-
-    /* أثناء القفل: منع التفاعل */
-    body.is-locked {
-      pointer-events: none;
-      user-select: none;
-    }
-
-    /* توسيط خلايا الجدول */
-    table th, table td { text-align: center; }
-  </style>
 </head>
 <body>
-  <div class="container">
-    <h1>نظام أرشفة الطلاب</h1>
 
-    <!-- نموذج الإدخال -->
-    <form id="studentForm" class="form-card">
-      <div class="grid">
-        <div>
-          <label for="name">الاسم</label>
-          <input id="name" />
-        </div>
-
-        <div>
-          <label for="nationalId">رقم الهوية</label>
-          <input id="nationalId" placeholder="10 أرقام" />
-        </div>
-
-        <div>
-          <label for="phone">رقم الجوال</label>
-          <input id="phone" placeholder="05XXXXXXXX أو 9665XXXXXXXX" />
-        </div>
-
-        <div>
-          <label for="employer">جهة العمل</label>
-          <input id="employer" />
-        </div>
-
-        <!-- نسخة الهوية: رفع ملف PDF/صورة بدلاً من checkbox -->
-        <div>
-          <label for="hasOriginalIdCopyFile">نسخة الهوية (PDF/صورة)</label>
-          <input id="hasOriginalIdCopyFile" type="file" accept=".pdf,image/*" />
-        </div>
-
-        <!-- الشهادة: رفع ملف PDF/صورة بدلاً من checkbox -->
-        <div>
-          <label for="hasOriginalCertificateFile">الشهادة (PDF/صورة)</label>
-          <input id="hasOriginalCertificateFile" type="file" accept=".pdf,image/*" />
-        </div>
-
-        <div>
-          <label for="paymentMethod">طريقة الدفع</label>
-          <select id="paymentMethod">
-            <option>شبكة</option>
-            <option>نقدي</option>
-          </select>
-        </div>
-
-        <div class="arrears">
-          <label>
-            <input type="checkbox" id="hasArrears" />
-            عليه متأخرات
-          </label>
-          <input id="arrearsAmount" placeholder="القيمة" disabled />
-        </div>
-
-        <div>
-          <label for="lastPayment">آخر سداد</label>
-          <input id="lastPayment" type="date" />
-        </div>
-
-        <div>
-          <label for="paymentCount">عدد مرات السداد</label>
-          <input id="paymentCount" type="number" min="0" value="0" />
-        </div>
-
-        <!-- جديد: تاريخ الانضمام -->
-        <div>
-          <label for="joinDate">تاريخ الانضمام</label>
-          <input id="joinDate" type="date" />
-        </div>
-
-        <div class="notes-field" style="grid-column: 1 / -1;">
-          <label for="notes">الملاحظات</label>
-          <textarea id="notes" rows="2" placeholder="اكتب ملاحظاتك هنا..."></textarea>
-        </div>
-      </div>
-
-      <div class="buttons">
-        <button type="submit" id="submitBtn">إضافة</button>
-        <button type="button" id="clearBtn">مسح النموذج</button>
-      </div>
-    </form>
-
-    <!-- عناصر التحكم العلوية -->
-    <div class="controls">
-      <input id="searchInput" placeholder="ابحث بالاسم/الهوية/الجوال/الملاحظات..." />
-      <div class="buttons">
-        <button id="exportBtn">تصدير Excel</button>
-        <button id="exportOverdueBtn">تصدير المتأخرين</button>
-        <label class="file-label">
-          استيراد Excel
-          <input type="file" id="importFile" accept=".xlsx, .xls" hidden />
-        </label>
-        <button id="clearAllBtn">مسح الكل</button>
-      </div>
-    </div>
-
-    <!-- شريط الإحصائيات -->
-    <div class="stats-bar">
-      <div>إجمالي السجلات: <strong id="statTotal">0</strong></div>
-      <div>عليهم متأخرات: <strong id="statArrears">0</strong></div>
-      <div>متأخرين 30+ يوم: <strong id="statOverdue">0</strong></div>
-      <div>مجموع المتأخرات: <strong id="statSum">0 ريال</strong></div>
-    </div>
-
-    <!-- فلاتر سريعة -->
-    <div class="quick-filters">
-      <button type="button" id="filterAll">الكل</button>
-      <button type="button" id="filterHasArrears">عليهم متأخرات</button>
-      <button type="button" id="filterOverdue">متأخرين 30+ يوم</button>
-      <select id="filterPay" title="تصفية حسب طريقة الدفع">
-        <option value="all">كل طرق الدفع</option>
-        <option value="شبكة">شبكة</option>
-        <option value="نقدي">نقدي</option>
-      </select>
-    </div>
-
-    <!-- الجدول -->
-    <div class="table-container">
-      <table id="studentsTable">
-        <thead>
-          <tr>
-            <th data-sort-key="ref">الرقم التسلسلي</th>
-            <th data-sort-key="name">الاسم</th>
-            <th data-sort-key="nationalId">رقم الهوية</th>
-            <th data-sort-key="phone">الجوال</th>
-            <th data-sort-key="employer">جهة العمل</th>
-            <th data-sort-key="hasOriginalIdCopy">نسخة الهوية</th>
-            <th data-sort-key="hasOriginalCertificate">الشهادة</th>
-            <th data-sort-key="paymentMethod">طريقة الدفع</th>
-            <th data-sort-key="arrearsAmount">متأخرات</th>
-            <th data-sort-key="lastPayment">آخر سداد</th>
-            <th data-sort-key="paymentCount">عدد مرات السداد</th>
-            <th data-sort-key="joinDate">تاريخ الانضمام</th>
-            <th data-sort-key="notes">الملاحظات</th>
-            <th>إجراءات</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr><td colspan="14" class="center">لا توجد سجلات</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- أزرار عائمة: قفل + إعادة تعيين (JS يبدّل display) -->
-  <div class="float-buttons" id="floatBtns">
-    <button class="float-btn" id="lockBtn">🔒 قفل</button>
-    <button class="float-btn" id="resetBtn">🔑 إعادة تعيين</button>
-  </div>
-
-  <!-- شاشة الدخول (overlay) -->
+  <!-- شاشة الدخول -->
   <div id="loginOverlay" class="login-overlay" aria-hidden="true">
     <div id="loginCard" class="login-card" role="dialog" aria-modal="true">
-      <h2 id="loginTitle">تعيين كلمة مرور</h2>
-      <p id="loginHint" class="login-hint">أول مرة! عيّن كلمة مرور للدخول لاحقًا</p>
+      <div class="login-logo">🗂️</div>
+      <h2 id="loginTitle">إدراء</h2>
+      <p id="loginHint" class="login-hint">تعيين كلمة مرور للمرة الأولى</p>
 
-      <!-- شاشة الدخول -->
       <form id="loginForm">
         <div class="login-row">
-          <label for="passwordInput" class="block-label">كلمة المرور</label>
-          <div style="display:flex; gap:6px">
-            <input id="passwordInput" type="password" />
-            <button type="button" id="togglePass" class="small-btn">إظهار</button>
+          <label for="passwordInput">كلمة المرور</label>
+          <div class="input-icon-wrap">
+            <input id="passwordInput" type="password" placeholder="أدخل كلمة المرور" autocomplete="current-password" />
+            <button type="button" id="togglePass" class="icon-btn" title="إظهار/إخفاء">👁</button>
           </div>
-          <div id="loginError" style="color:crimson; margin-top:6px"></div>
+          <div id="loginError" class="error-msg"></div>
         </div>
-        <div class="login-actions" style="display:flex; gap:8px; justify-content:center; margin-top:12px">
-          <button type="submit">دخول / تعيين</button>
-          <button type="button" id="openResetWithPwd">إعادة تعيين بكلمة المرور</button>
+        <div class="login-actions">
+          <button type="submit" class="btn-primary">دخول</button>
+          <button type="button" id="openResetWithPwd" class="btn-ghost">تغيير كلمة المرور</button>
         </div>
       </form>
 
-      <!-- إعادة التعيين بكلمة المرور الحالية -->
-      <form id="resetFormPwd" style="display:none; margin-top:12px">
+      <form id="resetFormPwd" style="display:none;">
         <div class="login-row">
-          <label for="currentPwd" class="block-label">كلمة المرور الحالية</label>
+          <label>كلمة المرور الحالية</label>
           <input id="currentPwd" type="password" />
         </div>
         <div class="login-row">
-          <label class="block-label">كلمة المرور الجديدة</label>
+          <label>كلمة المرور الجديدة</label>
           <input id="newPwd" type="password" />
         </div>
         <div class="login-row">
-          <label class="block-label">تأكيد</label>
+          <label>تأكيد كلمة المرور</label>
           <input id="newPwd2" type="password" />
-          <div id="resetPwdError" style="color:crimson; margin-top:6px"></div>
+          <div id="resetPwdError" class="error-msg"></div>
         </div>
-        <div class="login-actions" style="display:flex; gap:8px; justify-content:center; margin-top:10px">
-          <button type="submit">تغيير</button>
-          <button type="button" id="cancelResetPwd">إلغاء</button>
+        <div class="login-actions">
+          <button type="submit" class="btn-primary">تغيير</button>
+          <button type="button" id="cancelResetPwd" class="btn-ghost">إلغاء</button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- سكربت التطبيق -->
-  <script src="renderer.js"></script>
+  <div class="app-wrapper">
+    <!-- رأس الصفحة -->
+    <header class="app-header">
+      <div class="header-brand">
+        <span class="brand-icon">🗂️</span>
+        <div>
+          <h1>إدراء</h1>
+          <span class="brand-sub">نظام أرشفة الطلاب</span>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button id="lockBtn" class="btn-icon" title="قفل التطبيق">🔒</button>
+        <button id="resetBtn" class="btn-icon" title="تغيير كلمة المرور">🔑</button>
+      </div>
+    </header>
+
+    <main class="container">
+
+      <!-- شريط الإحصائيات -->
+      <div class="stats-bar">
+        <div class="stat-card">
+          <span class="stat-num" id="statTotal">0</span>
+          <span class="stat-lbl">إجمالي الطلاب</span>
+        </div>
+        <div class="stat-card arrears-card">
+          <span class="stat-num" id="statArrears">0</span>
+          <span class="stat-lbl">عليهم متأخرات</span>
+        </div>
+        <div class="stat-card overdue-card">
+          <span class="stat-num" id="statOverdue">0</span>
+          <span class="stat-lbl">متأخرين +30 يوم</span>
+        </div>
+        <div class="stat-card sum-card">
+          <span class="stat-num" id="statSum">0</span>
+          <span class="stat-lbl">مجموع المتأخرات (ريال)</span>
+        </div>
+      </div>
+
+      <!-- نموذج الإضافة -->
+      <section class="form-card" id="formSection">
+        <div class="form-header">
+          <h2 id="formTitle">➕ إضافة طالب</h2>
+          <button type="button" id="toggleFormBtn" class="btn-ghost small">طيّ النموذج ▲</button>
+        </div>
+        <form id="studentForm">
+          <div class="grid">
+            <div class="field">
+              <label for="name">الاسم الرباعي <span class="req">*</span></label>
+              <input id="name" placeholder="محمد عبدالله الغامدي الزهراني" />
+            </div>
+            <div class="field">
+              <label for="nationalId">رقم الهوية <span class="req">*</span></label>
+              <input id="nationalId" placeholder="1XXXXXXXXX" maxlength="10" inputmode="numeric" />
+            </div>
+            <div class="field">
+              <label for="phone">رقم الجوال <span class="req">*</span></label>
+              <input id="phone" placeholder="05XXXXXXXX" maxlength="12" inputmode="tel" />
+            </div>
+            <div class="field">
+              <label for="employer">جهة العمل</label>
+              <input id="employer" placeholder="وزارة التعليم" />
+            </div>
+            <div class="field">
+              <label for="paymentMethod">طريقة الدفع</label>
+              <select id="paymentMethod">
+                <option value="شبكة">شبكة</option>
+                <option value="نقدي">نقدي</option>
+                <option value="تحويل">تحويل بنكي</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="joinDate">تاريخ الانضمام</label>
+              <input id="joinDate" type="date" />
+            </div>
+            <div class="field">
+              <label for="lastPayment">تاريخ آخر سداد</label>
+              <input id="lastPayment" type="date" />
+            </div>
+            <div class="field">
+              <label for="paymentCount">عدد مرات السداد</label>
+              <input id="paymentCount" type="number" min="0" value="0" />
+            </div>
+            <!-- المتأخرات -->
+            <div class="field arrears-field">
+              <label class="checkbox-label">
+                <input type="checkbox" id="hasArrears" />
+                <span>عليه متأخرات</span>
+              </label>
+              <input id="arrearsAmount" placeholder="قيمة المتأخرات بالريال" disabled inputmode="numeric" />
+            </div>
+            <!-- ملفات -->
+            <div class="field file-field">
+              <label>نسخة الهوية الوطنية</label>
+              <div class="file-drop" id="idFileDrop">
+                <input id="hasOriginalIdCopyFile" type="file" accept=".pdf,image/*" hidden />
+                <button type="button" class="btn-ghost small" onclick="document.getElementById('hasOriginalIdCopyFile').click()">📎 اختر ملف</button>
+                <span id="idFileName" class="file-name">لم يُختر ملف</span>
+              </div>
+            </div>
+            <div class="field file-field">
+              <label>المؤهل العلمي (الشهادة)</label>
+              <div class="file-drop" id="certFileDrop">
+                <input id="hasOriginalCertificateFile" type="file" accept=".pdf,image/*" hidden />
+                <button type="button" class="btn-ghost small" onclick="document.getElementById('hasOriginalCertificateFile').click()">📎 اختر ملف</button>
+                <span id="certFileName" class="file-name">لم يُختر ملف</span>
+              </div>
+            </div>
+            <!-- الملاحظات -->
+            <div class="field notes-field">
+              <label for="notes">الملاحظات</label>
+              <textarea id="notes" rows="2" placeholder="أي ملاحظات إضافية..."></textarea>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="submit" id="submitBtn" class="btn-primary">➕ إضافة</button>
+            <button type="button" id="clearBtn" class="btn-ghost">مسح النموذج</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- شريط التحكم -->
+      <div class="controls-bar">
+        <div class="search-wrap">
+          <span class="search-icon">🔍</span>
+          <input id="searchInput" placeholder="ابحث بالاسم، الهوية، الجوال، جهة العمل..." />
+        </div>
+        <div class="ctrl-actions">
+          <button id="exportBtn" class="btn-success">⬇ تصدير Excel</button>
+          <button id="exportOverdueBtn" class="btn-danger">⬇ المتأخرين</button>
+          <label class="btn-outline file-upload-label">
+            ⬆ استيراد Excel
+            <input type="file" id="importFile" accept=".xlsx,.xls" hidden />
+          </label>
+          <button id="clearAllBtn" class="btn-danger-ghost">🗑 مسح الكل</button>
+        </div>
+      </div>
+
+      <!-- فلاتر سريعة -->
+      <div class="quick-filters">
+        <button type="button" id="filterAll" class="filter-btn active">الكل</button>
+        <button type="button" id="filterHasArrears" class="filter-btn">عليهم متأخرات</button>
+        <button type="button" id="filterOverdue" class="filter-btn danger">متأخرين +30 يوم</button>
+        <select id="filterPay" class="filter-select">
+          <option value="all">كل طرق الدفع</option>
+          <option value="شبكة">شبكة</option>
+          <option value="نقدي">نقدي</option>
+          <option value="تحويل">تحويل بنكي</option>
+        </select>
+        <select id="filterCert" class="filter-select">
+          <option value="all">الشهادة (الكل)</option>
+          <option value="yes">سلّم الشهادة</option>
+          <option value="no">لم يسلم الشهادة</option>
+        </select>
+      </div>
+
+      <!-- الجدول -->
+      <div class="table-container">
+        <table id="studentsTable">
+          <thead>
+            <tr>
+              <th data-sort-key="ref">#</th>
+              <th data-sort-key="name">الاسم</th>
+              <th data-sort-key="nationalId">رقم الهوية</th>
+              <th data-sort-key="phone">الجوال</th>
+              <th data-sort-key="employer">جهة العمل</th>
+              <th data-sort-key="hasOriginalIdCopy">نسخة الهوية</th>
+              <th data-sort-key="hasOriginalCertificate">الشهادة</th>
+              <th data-sort-key="paymentMethod">طريقة الدفع</th>
+              <th data-sort-key="arrearsAmount">المتأخرات</th>
+              <th data-sort-key="lastPayment">آخر سداد</th>
+              <th data-sort-key="paymentCount">مرات السداد</th>
+              <th data-sort-key="joinDate">تاريخ الانضمام</th>
+              <th data-sort-key="notes">ملاحظات</th>
+              <th>إجراءات</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td colspan="14" class="empty-row">لا توجد سجلات</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <!-- مكتبة XLSX من CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <!-- SweetAlert2 من CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.10.1/sweetalert2.all.min.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
