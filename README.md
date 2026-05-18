@@ -1,12 +1,76 @@
-# React + Vite
+# إدراء — نظام أرشفة الطلاب 🗂️
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+تطبيق ويب لأرشفة بيانات الطلاب يعمل مباشرة على **GitHub Pages** بدون أي خادم أو قاعدة بيانات خارجية.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🚀 النشر على GitHub Pages
 
-## Expanding the ESLint configuration
+### الخطوات:
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+1. **أنشئ مستودعاً جديداً** على GitHub (مثلاً: `student-archive`)
+
+2. **ارفع الملفات الثلاثة** إلى المستودع:
+   - `index.html`
+   - `style.css`
+   - `app.js`
+
+3. **فعّل GitHub Pages:**
+   - اذهب إلى **Settings** → **Pages**
+   - في **Source** اختر: `Deploy from a branch`
+   - Branch: `main` → Folder: `/ (root)`
+   - اضغط **Save**
+
+4. **انتظر دقيقة** ثم افتح الرابط:
+   ```
+   https://اسم-المستخدم.github.io/student-archive/
+   ```
+
+---
+
+## ✨ المميزات
+
+| الميزة | التفاصيل |
+|--------|----------|
+| 🔐 كلمة مرور | تشفير SHA-256 — لا ترسل بياناتك لأي خادم |
+| 🔒 قفل تلقائي | بعد 20 دقيقة من الخمول |
+| 📋 أرشفة كاملة | الاسم الرباعي، الهوية، الجوال، جهة العمل |
+| 📁 رفع ملفات | نسخة الهوية والشهادة (PDF/صور) تُحفظ محلياً |
+| 💰 تتبع المتأخرات | قيمة المتأخرات، آخر سداد، عدد مرات السداد |
+| 📊 إحصائيات فورية | عداد المتأخرين والمبالغ |
+| 🔍 بحث وفلترة | بالاسم، الهوية، الجوال، جهة العمل |
+| ⬇️ تصدير Excel | تصدير الكل أو المتأخرين فقط |
+| ⬆️ استيراد Excel | مرن يتعرف على أسماء الأعمدة تلقائياً |
+| 📱 متجاوب | يعمل على الجوال والتابلت والكمبيوتر |
+
+---
+
+## 💾 التخزين
+
+- البيانات تُحفظ في **localStorage** في المتصفح
+- الملفات المرفوعة (PDF/صور) تُحفظ كـ base64 في المتصفح
+- **لا ترسل أي بيانات** لخادم خارجي
+
+> ⚠️ **تنبيه:** مسح بيانات المتصفح (Clear Site Data) سيحذف جميع السجلات. يُنصح بتصدير Excel دورياً كنسخة احتياطية.
+
+---
+
+## 📁 ملفات المشروع
+
+```
+student-archive/
+├── index.html   ← هيكل الصفحة
+├── style.css    ← التصميم
+├── app.js       ← منطق التطبيق
+└── README.md    ← هذا الملف
+```
+
+---
+
+## 🛠️ التطوير المحلي
+
+افتح `index.html` مباشرة في المتصفح — لا تحتاج أي خادم.
+
+---
+
+صُنع بـ ❤️ لخدمة أرشفة الطلاب
