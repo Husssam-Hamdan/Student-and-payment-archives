@@ -1,0 +1,41 @@
+{
+  "name": "student-archive",
+  "version": "1.0.10",
+  "description": " أرشفة الطلاب",
+  "author": "hossa",
+  "main": "main.js",
+  "build": {
+    "appId": "com.hossa.studentarchive",
+    "productName": "تسجيل الطلاب",
+    "files": [
+      "**/*",
+      "!dist/**",
+      "!release/**",
+      "!**/*.map"
+    ],
+    "asar": true,
+    "directories": {
+      "output": "release",
+      "buildResources": "build"
+    },
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "artifactName": "${productName}-${version}.exe"
+    }
+  },
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder"
+  },
+  "devDependencies": {
+    "electron": "^26.6.10",
+    "electron-builder": "^24.13.3",
+    "electron-packager": "^17.1.2"
+  },
+  "dependencies": {
+    "sweetalert2": "^11.23.0",
+    "xlsx": "^0.18.5"
+  }
+}
